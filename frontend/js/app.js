@@ -15,11 +15,9 @@ class SATApp {
     this.isSubmitted = false;
     this.elapsedBeforePause = 0;
     
-    // AI API Proxy URL - REPLACE YOUR_SUBDOMAIN with your Cloudflare account subdomain
-    // Format: https://satp-ai-proxy.YOUR_SUBDOMAIN.workers.dev
-    // Find your subdomain: Cloudflare Dashboard → Workers & Pages → Overview → "Subdomain"
-    // Example: if your Pages URL is satp.pages.dev, subdomain might be "enochliu0318"
-    this.aiProxyUrl = 'https://satp-ai-proxy.YOUR_SUBDOMAIN.workers.dev';
+    // AI API Proxy URL - Worker 已部署
+    // 你的子域名: enochliu0318
+    this.aiProxyUrl = 'https://satp-ai-proxy.enochliu0318.workers.dev';
     
     // DOM elements
     this.elements = {};

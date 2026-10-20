@@ -1,0 +1,4 @@
+# Worker 配置 - 专用于 AI 代理
+name = "satp-ai-proxy"
+main = "ai-proxy.js"
+compatibility_date = "2024-10-19"
