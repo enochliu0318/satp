@@ -1,0 +1,10 @@
+{
+  "sample-info-ideas-1": {
+    "id": "sample-info-ideas-1",
+    "title": "Information & Ideas - Sample Practice Set",
+    "file": "sample.json",
+    "category": "Information & Ideas",
+    "totalQuestions": 5,
+    "timeLimitMinutes": 10
+  }
+}

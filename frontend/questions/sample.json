@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "id": "sample-info-ideas-1",
+    "title": "Information & Ideas - Sample Practice Set",
+    "category": "Information & Ideas",
+    "totalQuestions": 5,
+    "timeLimitMinutes": 10,
+    "source": "Sample questions for demonstration",
+    "generatedAt": "2026-10-19T20:00:00Z"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "passage": "The following text is from a 1924 novel by Edith Wharton.\n\n\"The long December evenings had begun, and the drawing-room lamps were lit. Mrs. Ballinger sat by the fire, her hands folded on her knee, looking into the glowing coals. She was thinking of her daughter, who had gone to Paris three months before to study art. The letters had been frequent at first, full of enthusiasm about the Louvre, the studios, the life. But lately they had grown shorter, more guarded. Mrs. Ballinger wondered if the city had swallowed her child whole, or if the daughter had simply found a new life that had no room for the old one.\"",
+      "question": "The main purpose of the passage is to",
+      "options": {
+        "A": "describe a mother's growing concern about her daughter's changing relationship with her",
+        "B": "contrast the artistic atmosphere of Paris with the domestic quiet of the drawing-room",
+        "C": "illustrate the challenges faced by women artists in the 1920s",
+        "D": "establish the setting for a story about artistic ambition and family duty"
+      },
+      "answer": "A",
+      "explanation": "The passage focuses on Mrs. Ballinger's internal thoughts as she observes the change in her daughter's letters - from frequent and enthusiastic to shorter and guarded. This shows a mother's concern about the shifting relationship.",
+      "tags": ["main-purpose", "inference"]
+    },
+    {
+      "id": 2,
+      "passage": "Recent research in cognitive psychology has revealed that the human brain processes visual information in two distinct pathways: the ventral stream (the \"what\" pathway) and the dorsal stream (the \"where\" pathway). The ventral stream, running from the primary visual cortex to the temporal lobe, specializes in object recognition and identification. The dorsal stream, running to the parietal lobe, handles spatial location and motion perception. Damage to the ventral stream can result in visual agnosia - the inability to recognize objects despite intact vision - while damage to the dorsal stream can cause optic ataxia, where patients cannot reach accurately for objects they can see and name.",
+      "question": "According to the passage, which of the following best describes the function of the dorsal stream?",
+      "options": {
+        "A": "Object recognition and identification",
+        "B": "Spatial location and motion perception",
+        "C": "Processing color and texture information",
+        "D": "Integrating visual memory with current perception"
+      },
+      "answer": "B",
+      "explanation": "The passage explicitly states: \"The dorsal stream, running to the parietal lobe, handles spatial location and motion perception.\" Option A describes the ventral stream.",
+      "tags": ["detail", "reading-comprehension"]
+    }
+  ]
+}
