@@ -1,0 +1,12 @@
+# SAT Practice - Cloudflare Pages Config
+# This file tells Cloudflare how to deploy the static site
+
+[build]
+command = ""
+destination = "frontend"
+
+[build.environment]
+NODE_VERSION = "18"
+
+# No build step needed - pure static HTML/CSS/JS
+# Cloudflare will serve files from frontend/ directory
