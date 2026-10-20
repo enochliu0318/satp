@@ -35,7 +35,7 @@
             <input type="file" id="ai-pdf-input" accept=".pdf" hidden>
             <button id="load-ai-pdf-btn" class="btn btn-accent">Upload PDF to AI</button>
             <div class="ai-config" id="ai-config">
-              <input type="url" id="ai-api-url" placeholder="API Endpoint (e.g. https://integrate.api.nvidia.com/v1/...)" class="input-field">
+              <input type="url" id="ai-api-url" value="https://integrate.api.nvidia.com/v1/chat/completions" placeholder="API Endpoint" class="input-field">
               <input type="password" id="ai-api-key" placeholder="API Key" class="input-field">
               <select id="ai-model" class="input-field">
                 <option value="nvidia/nemotron-3-ultra">Nemotron 3 Ultra</option>
@@ -43,6 +43,7 @@
                 <option value="custom">Custom Model</option>
               </select>
               <textarea id="ai-prompt" class="input-field" rows="4" placeholder="Custom prompt (optional) - leave blank for default SAT extraction prompt"></textarea>
+              <p class="hint">默认端点: <code>https://integrate.api.nvidia.com/v1/chat/completions</code> (需开通 NVIDIA NGC 权限)</p>
             </div>
             <button id="toggle-ai-config" class="btn btn-secondary btn-sm">⚙️ Configure API</button>
           </div>
