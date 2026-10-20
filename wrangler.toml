@@ -1,6 +1,8 @@
-# SAT Practice - Cloudflare Pages Config
-# This file tells Cloudflare how to deploy the static site
+# SAT Practice - Cloudflare Config
+# This file supports both Pages (frontend) and Workers (AI proxy)
 
+# ============ Pages Config (for frontend) ============
+# Deploy: wrangler pages deploy frontend --project-name=sat-practice
 [build]
 command = ""
 destination = "frontend"
@@ -8,5 +10,8 @@ destination = "frontend"
 [build.environment]
 NODE_VERSION = "18"
 
-# No build step needed - pure static HTML/CSS/JS
-# Cloudflare will serve files from frontend/ directory
+# ============ Worker Config (for AI proxy) ============
+# Deploy: wrangler deploy
+name = "satp-ai-proxy"
+main = "worker/ai-proxy.js"
+compatibility_date = "2024-10-19"

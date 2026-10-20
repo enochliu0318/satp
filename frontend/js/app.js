@@ -15,6 +15,11 @@ class SATApp {
     this.isSubmitted = false;
     this.elapsedBeforePause = 0;
     
+    // AI API Proxy URL - Set to your Cloudflare Worker URL after deployment
+    // Example: 'https://satp-ai-proxy.YOUR_SUBDOMAIN.workers.dev'
+    // Leave empty for direct calls (will fail in browser due to CORS)
+    this.aiProxyUrl = '';
+    
     // DOM elements
     this.elements = {};
     this.bindElements();
@@ -312,13 +317,26 @@ Rules:
       temperature: 0.1
     };
 
-    const response = await fetch(apiUrl, {
+    // Use proxy if configured, otherwise direct call
+    const targetUrl = this.aiProxyUrl 
+      ? this.aiProxyUrl 
+      : apiUrl;
+    
+    const requestBody = this.aiProxyUrl
+      ? { apiUrl, apiKey, payload }
+      : payload;
+
+    const headers = this.aiProxyUrl
+      ? { 'Content-Type': 'application/json' }
+      : { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        };
+
+    const response = await fetch(targetUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify(payload)
+      headers,
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
@@ -336,6 +354,9 @@ Rules:
       content = data.output.text;
     } else if (data.response) {
       content = data.response;
+    } else if (data.choices?.[0]?.message?.content === undefined && data.error) {
+      // Proxy error response
+      throw new Error(data.error.message || JSON.stringify(data.error));
     } else {
       throw new Error('Unexpected API response format');
     }
