@@ -294,80 +294,122 @@ Rules:
   }
 
   async callAiApi(apiUrl, apiKey, model, pdfBase64, prompt, filename) {
-    // NVIDIA API format (adjust for your specific API)
-    const payload = {
-      model: model,
-      messages: [
-        {
+    // Try multiple NVIDIA API endpoints and payload formats
+    const endpoints = [
+      // Standard OpenAI-compatible endpoint
+      { url: 'https://integrate.api.nvidia.com/v1/chat/completions', format: 'openai' },
+      // Alternative NVIDIA endpoints
+      { url: 'https://api.nvidia.com/v1/chat/completions', format: 'openai' },
+      { url: 'https://integrate.api.nvidia.com/v1/completions', format: 'completions' },
+    ];
+
+    // Also try the user-provided URL first
+    const allEndpoints = [{ url: apiUrl, format: 'openai' }, ...endpoints.filter(e => e.url !== apiUrl)];
+
+    // Payload formats to try
+    const buildPayload = (fmt, m, p, fn) => {
+      if (fmt === 'completions') {
+        // Legacy completions format
+        return {
+          model: m,
+          prompt: `${p}\n\nFile: ${fn} (base64 PDF attached)\n\nExtract SAT questions as JSON.`,
+          max_tokens: 8192,
+          temperature: 0.1
+        };
+      }
+      // OpenAI chat format (default)
+      return {
+        model: m,
+        messages: [{
           role: "user",
           content: [
-            { type: "text", text: prompt },
-            { 
-              type: "file", 
-              file: {
-                filename: filename,
-                file_data: pdfBase64
-              }
-            }
+            { type: "text", text: p },
+            { type: "file", file: { filename: fn, file_data: pdfBase64 } }
           ]
-        }
-      ],
-      max_tokens: 8192,
-      temperature: 0.1
+        }],
+        max_tokens: 8192,
+        temperature: 0.1
+      };
     };
 
-    // Use proxy if configured, otherwise direct call
-    const targetUrl = this.aiProxyUrl 
-      ? this.aiProxyUrl 
-      : apiUrl;
-    
-    const requestBody = this.aiProxyUrl
-      ? { apiUrl, apiKey, payload }
-      : payload;
+    let lastError = null;
 
-    const headers = this.aiProxyUrl
-      ? { 'Content-Type': 'application/json' }
-      : { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        };
+    for (const endpoint of allEndpoints) {
+      for (const fmt of ['openai', 'completions']) {
+        try {
+          console.log(`Trying ${endpoint.url} with ${fmt} format, model: ${model}`);
+          
+          const payload = buildPayload(fmt, model, prompt, filename);
+          
+          const targetUrl = this.aiProxyUrl ? this.aiProxyUrl : endpoint.url;
+          const requestBody = this.aiProxyUrl 
+            ? { apiUrl: endpoint.url, apiKey, payload }
+            : payload;
+          
+          const headers = this.aiProxyUrl
+            ? { 'Content-Type': 'application/json' }
+            : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
 
-    const response = await fetch(targetUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(requestBody)
-    });
+          const response = await fetch(targetUrl, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(requestBody)
+          });
 
-    if (!response.ok) {
-      const err = await response.text();
-      throw new Error(`API ${response.status}: ${err}`);
+          const contentType = response.headers.get('content-type') || '';
+          let data;
+          
+          if (contentType.includes('application/json')) {
+            data = await response.json();
+          } else {
+            const text = await response.text();
+            console.log(`Non-JSON response from ${endpoint.url}:`, text.slice(0, 500));
+            continue; // Try next endpoint
+          }
+
+          if (!response.ok) {
+            console.log(`API error ${response.status} from ${endpoint.url}:`, data);
+            continue; // Try next endpoint
+          }
+
+          // Extract content
+          let content = '';
+          if (data.choices?.[0]?.message?.content) {
+            content = data.choices[0].message.content;
+          } else if (data.choices?.[0]?.text) {
+            content = data.choices[0].text;
+          } else if (data.output?.text) {
+            content = data.output.text;
+          } else if (data.response) {
+            content = data.response;
+          } else if (data.error) {
+            console.log(`API error from ${endpoint.url}:`, data.error);
+            continue;
+          } else {
+            console.log(`Unexpected format from ${endpoint.url}:`, data);
+            continue;
+          }
+
+          // Parse JSON from response
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (!jsonMatch) {
+            console.log(`No JSON found in response from ${endpoint.url}:`, content.slice(0, 500));
+            continue;
+          }
+
+          console.log(`Success with ${endpoint.url} (${fmt})`);
+          const parsed = JSON.parse(jsonMatch[0]);
+          return QuestionLoader.validateAndNormalize(parsed);
+
+        } catch (err) {
+          lastError = err;
+          console.log(`Failed ${endpoint.url} (${fmt}):`, err.message);
+          continue;
+        }
+      }
     }
 
-    const data = await response.json();
-    
-    // Extract JSON from response (handle different API formats)
-    let content = '';
-    if (data.choices?.[0]?.message?.content) {
-      content = data.choices[0].message.content;
-    } else if (data.output?.text) {
-      content = data.output.text;
-    } else if (data.response) {
-      content = data.response;
-    } else if (data.choices?.[0]?.message?.content === undefined && data.error) {
-      // Proxy error response
-      throw new Error(data.error.message || JSON.stringify(data.error));
-    } else {
-      throw new Error('Unexpected API response format');
-    }
-
-    // Parse the JSON from the response
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('No JSON found in AI response');
-    }
-    
-    const parsed = JSON.parse(jsonMatch[0]);
-    return QuestionLoader.validateAndNormalize(parsed);
+    throw lastError || new Error('All NVIDIA API endpoints failed. Check API key, model access, and network.');
   }
 
   // ==================== Practice Screen ====================
