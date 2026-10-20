@@ -1,9 +1,6 @@
 /*
  * Cloudflare Worker - AI API Proxy
  * Deploy this as a Worker to proxy NVIDIA API calls (bypasses CORS)
- * 
- * Deploy: wrangler deploy --name satp-ai-proxy
- * Or via Cloudflare Dashboard: Workers & Pages → Create Worker
  */
 
 export default {
@@ -15,7 +12,7 @@ export default {
 
     // Only allow POST
     if (request.method !== 'POST') {
-      return new Response('Method Not Allowed', { status: 405 });
+      return jsonResponse({ error: 'Method Not Allowed' }, 405);
     }
 
     try {
@@ -36,11 +33,22 @@ export default {
         body: JSON.stringify(body.payload)
       });
 
-      const data = await apiResponse.json();
+      // Handle non-JSON responses (e.g., HTML error pages)
+      const contentType = apiResponse.headers.get('content-type') || '';
+      let data;
+      
+      if (contentType.includes('application/json')) {
+        data = await apiResponse.json();
+      } else {
+        const text = await apiResponse.text();
+        data = { 
+          error: `API returned ${apiResponse.status}: ${text.slice(0, 200)}` 
+        };
+      }
       
       return jsonResponse(data, apiResponse.status);
     } catch (err) {
-      return jsonResponse({ error: err.message }, 500);
+      return jsonResponse({ error: `Proxy error: ${err.message}` }, 500);
     }
   }
 };
